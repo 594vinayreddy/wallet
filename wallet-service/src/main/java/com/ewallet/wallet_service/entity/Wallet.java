@@ -20,13 +20,15 @@ public class Wallet {
     private Long id;
 
     @Column(unique = true, nullable = false)
-    private Long UserId;
+    private Long userId;
 
     @Column(nullable = false)
-    private String Email;
+    private String email;
 
     @Column(nullable = false, precision = 19, scale = 4)
     private BigDecimal balance;
+
+    private String pin;
 
     @Version
     private Long version;

@@ -4,6 +4,8 @@ import com.ewallet.wallet_service.config.RabbitMQConfig;
 import com.ewallet.wallet_service.entity.Wallet;
 import com.ewallet.wallet_service.event.UserRegisteredEvent;
 import com.ewallet.wallet_service.repository.WalletRepository;
+import com.ewallet.wallet_service.service.WalletService;
+import jakarta.persistence.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -17,6 +19,7 @@ import java.math.BigDecimal;
 public class WalletRegisteredListener {
 
     private final WalletRepository walletRepository;
+    private final WalletService walletService;
 
     @RabbitListener(queues = RabbitMQConfig.WALLET_QUEUE)
     public void onUserRegistered(UserRegisteredEvent event) {
@@ -27,7 +30,12 @@ public class WalletRegisteredListener {
             return;
         }
 
-        Wallet wallet = new Wallet(null, event.getUserId(), event.getEmail(), BigDecimal.ZERO,null);
+        Wallet wallet = Wallet.builder()
+                .userId(event.getUserId())
+                .email(event.getEmail())
+                .balance(BigDecimal.ZERO)
+                .pin("1234") // directly set
+                .build();
 
         walletRepository.save(wallet);
         log.info("Created wallet for userId: {}", event.getUserId());
