@@ -15,10 +15,12 @@ public class RabbitMQConfig {
 
     public static final String WALLET_QUEUE       = "wallet.registered.queue";
     public static final String NOTIFICATION_QUEUE = "notification.transaction.queue";
+    public static final String USER_TO_WALLET_QUEUE = "user_to_wallet.registered.queue";
 
     public static final String ROUTING_KEY_MONEY_SENT     = "wallet.money.sent";
     public static final String ROUTING_KEY_MONEY_RECEIVED = "wallet.money.received";
     public static final String ROUTING_KEY_USER_REGISTERED = "notification.registered";
+    public static final String USER_TO_WALLET_ROUTING_KEY = "user_to_wallet.registered";
 
     @Bean
     public DirectExchange ewalletExchange() {
@@ -33,6 +35,11 @@ public class RabbitMQConfig {
     @Bean
     public Queue notificationQueue() {
         return QueueBuilder.durable(NOTIFICATION_QUEUE).build();
+    }
+
+    @Bean
+    public Queue userToWalletQueue() {
+        return QueueBuilder.durable(USER_TO_WALLET_QUEUE).build();
     }
 
     @Bean
@@ -73,6 +80,14 @@ public class RabbitMQConfig {
                 .bind(notificationQueue)
                 .to(ewalletExchange)
                 .with(ROUTING_KEY_USER_REGISTERED);
+    }
+
+    @Bean
+    public Binding userToWalletBinding(Queue userToWalletQueue, DirectExchange ewalletExchange) {
+        return BindingBuilder
+                .bind(userToWalletQueue)
+                .to(ewalletExchange)
+                .with(USER_TO_WALLET_ROUTING_KEY);
     }
 
     @Bean

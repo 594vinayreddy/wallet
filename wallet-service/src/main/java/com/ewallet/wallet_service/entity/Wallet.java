@@ -16,7 +16,8 @@ import java.math.BigDecimal;
 @Builder
 public class Wallet {
 
-    @Id@GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(unique = true, nullable = false)
@@ -33,30 +34,3 @@ public class Wallet {
     @Version
     private Long version;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
