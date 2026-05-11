@@ -49,4 +49,10 @@ public class WalletController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/{userId}/balance")
+    public ResponseEntity<BigDecimal> getBalance(@PathVariable Long userId) {
+        Wallet wallet = walletService.getWalletByUserId(userId);
+        return ResponseEntity.ok(wallet.getBalance());
+    }
+
 }
