@@ -9,4 +9,8 @@ public interface WalletRepository extends JpaRepository<Wallet, Long> {
     void deleteByUserId(Long userId);
 
     boolean existsByUserId(Long userId);
+
+    boolean existsByEmail(String email);
+
+    Wallet getByEmail(String email);
 }

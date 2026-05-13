@@ -49,7 +49,7 @@ public class WalletService {
     }
 
     @Transactional
-    public Wallet credit(Long userId, BigDecimal amount){
+    public void credit(Long userId, BigDecimal amount){
         if(amount.compareTo(BigDecimal.ZERO)<=0){
             throw new IllegalArgumentException("Amount must be positive");
         }
@@ -68,11 +68,31 @@ public class WalletService {
         );
         log.info("Published to notification service for email: {}", notificationEvent.getEmail());
 
-        return savedWallet;
     }
 
     @Transactional
-    public Wallet debit(Long userId, BigDecimal amount){
+    public void creditOnTransaction(String email, BigDecimal amount){
+        if(amount.compareTo(BigDecimal.ZERO)<=0){
+            throw new IllegalArgumentException("Amount must be positive");
+        }
+        Wallet wallet=walletRepository.getByEmail(email);
+        wallet.setBalance(wallet.getBalance().add(amount));
+        Wallet savedWallet=walletRepository.save(wallet);
+
+        NotificationEvent notificationEvent= new NotificationEvent(NotificationEvent.Type.RECEIVED,wallet.getEmail(),amount);
+
+        rabbitTemplate.convertAndSend(
+                RabbitMQConfig.EXCHANGE,
+                RabbitMQConfig.ROUTING_KEY_MONEY_RECEIVED,
+                notificationEvent
+        );
+        log.info("Published to notification service for email: {}", notificationEvent.getEmail());
+
+    }
+
+
+    @Transactional
+    public void debit(Long userId, BigDecimal amount){
         if(amount.compareTo(BigDecimal.ZERO)<=0){
             throw new IllegalArgumentException("Amount must be positive");
         }
@@ -94,7 +114,29 @@ public class WalletService {
         );
         log.info("Published to notification service for email: {}", notificationEvent.getEmail());
 
-        return savedWallet;
+    }
+
+    @Transactional
+    public void debitOnTransaction(String email, BigDecimal amount){
+        if(amount.compareTo(BigDecimal.ZERO)<=0){
+            throw new IllegalArgumentException("Amount must be positive");
+        }
+        Wallet wallet=walletRepository.getByEmail(email);
+        if(wallet.getBalance().compareTo(amount)<0){
+            throw new RuntimeException("Insufficient balance");
+        }
+        wallet.setBalance(wallet.getBalance().subtract(amount));
+        Wallet savedWallet=walletRepository.save(wallet);
+
+        NotificationEvent notificationEvent= new NotificationEvent(NotificationEvent.Type.SENT,wallet.getEmail(),amount);
+
+        rabbitTemplate.convertAndSend(
+                RabbitMQConfig.EXCHANGE,
+                RabbitMQConfig.ROUTING_KEY_MONEY_SENT,
+                notificationEvent
+        );
+        log.info("Published to notification service for email: {}", notificationEvent.getEmail());
+
     }
 
     public List<WalletTransactionDTO> getHistory(Long walletId) {
