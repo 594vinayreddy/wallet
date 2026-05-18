@@ -1,7 +1,6 @@
 package com.ewallet.wallet_service.controller;
 
-import com.ewallet.wallet_service.dto.SetPinRequest;
-import com.ewallet.wallet_service.dto.WalletTransactionDTO;
+import com.ewallet.wallet_service.dto.*;
 import com.ewallet.wallet_service.entity.Wallet;
 import com.ewallet.wallet_service.repository.WalletRepository;
 import com.ewallet.wallet_service.service.WalletService;
@@ -33,9 +32,16 @@ public class WalletController {
 
     @PostMapping("/set-pin")
     public ResponseEntity<?> setPin(@RequestBody SetPinRequest request) {
-        walletService.setPin(request, "1234");
+        walletService.setPin(request);
         return ResponseEntity.ok("PIN set successfully");
     }
+
+    @PostMapping("/update-pin")
+    public ResponseEntity<?> updatePin(@RequestBody ChangePinRequest request) {
+        walletService.changePin(request);
+        return ResponseEntity.ok("PIN updated successfully");
+    }
+
 
     @PostMapping("/{userId}/credit")
     public ResponseEntity<Void> credit(@PathVariable Long userId,
@@ -49,31 +55,23 @@ public class WalletController {
 
     @PostMapping("/{userId}/debit")
     public ResponseEntity<Void> debit(@PathVariable Long userId,
-                                        @RequestParam BigDecimal amount) {
+                                        @RequestParam BigDecimal amount, String pin) {
         if (!walletRepository.existsByUserId(userId)) {
             return ResponseEntity.notFound().build();
         }
-        walletService.debit(userId, amount);
+        walletService.debit(userId, amount,pin);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/{email}/creditOnTransaction")
-    public ResponseEntity<Void> creditOnTransaction(@PathVariable String email,
-                                       @RequestParam BigDecimal amount) {
-        if (!walletRepository.existsByEmail(email)) {
-            return ResponseEntity.notFound().build();
-        }
-        walletService.creditOnTransaction(email, amount);
+    public ResponseEntity<Void> creditOnTransaction(@RequestBody CreditRequest request) {
+        walletService.creditOnTransaction(request.getEmail(), request.getAmount());
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/{email}/debitOnTransaction")
-    public ResponseEntity<Void> debitOnTransaction(@PathVariable String email,
-                                      @RequestParam BigDecimal amount) {
-        if (!walletRepository.existsByEmail(email)) {
-            return ResponseEntity.notFound().build();
-        }
-        walletService.debitOnTransaction(email, amount);
+    public ResponseEntity<Void> debitOnTransaction(@RequestBody DebitRequest request) {
+        walletService.debitOnTransaction(request.getEmail(), request.getAmount(), request.getPin());
         return ResponseEntity.ok().build();
     }
 

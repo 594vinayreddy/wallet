@@ -34,7 +34,7 @@ public class WalletRegisteredListener {
                 .userId(event.getUserId())
                 .email(event.getEmail())
                 .balance(BigDecimal.ZERO)
-                .pin("1234") // directly set
+                .pin(null) // directly set
                 .build();
 
         walletRepository.save(wallet);

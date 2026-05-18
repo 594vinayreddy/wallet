@@ -3,7 +3,8 @@ package com.ewallet.wallet_service.dto;
 import lombok.Data;
 
 @Data
-public class SetPinRequest {
+public class ChangePinRequest {
     private Long userId;
-    private String pin;
+    private String oldPin;
+    private String newPin;
 }
