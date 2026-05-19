@@ -12,6 +12,7 @@ import com.ewallet.wallet_service.repository.WalletTransactionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,31 +56,20 @@ public class WalletService {
         log.info("PIN changed successfully for userId: {}", request.getUserId());
     }
 
-    public void verifyPin(Long userId, String pin) {
+    public boolean verifyPin(Long userId, String pin) {
         Wallet wallet = getWalletByUserId(userId);
 
         if (wallet.getPin() == null || wallet.getPin().isEmpty()) {
             throw new RuntimeException("No PIN set for this wallet.");
         }
 
-        if (!passwordEncoder.matches(pin, wallet.getPin())) {
-            throw new RuntimeException("Invalid PIN.");
-        }
-    }
-
-    public boolean isPinSet(Long userId) {
-        Wallet wallet = getWalletByUserId(userId);
-        return wallet.getPin() != null && !wallet.getPin().isEmpty();
+        return passwordEncoder.matches(pin, wallet.getPin());
     }
 
     public Wallet getWalletByUserId(Long userId) {
 
         return walletRepository.findByUserId(userId)
-                .orElseThrow(() ->
-                        new RuntimeException(
-                                "Wallet not found for userId: "
-                                        + userId
-                        ));
+                .orElseThrow(() -> new RuntimeException("Wallet not found for userId: " + userId));
     }
 
     @Transactional

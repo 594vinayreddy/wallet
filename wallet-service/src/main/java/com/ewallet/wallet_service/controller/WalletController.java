@@ -36,6 +36,17 @@ public class WalletController {
         return ResponseEntity.ok("PIN set successfully");
     }
 
+    @PostMapping("/verify-pin")
+    public ResponseEntity<Boolean> verifyPin(@RequestBody VerifyPinRequest request) {
+
+        boolean isValid = walletService.verifyPin(
+                request.getUserId(),
+                request.getPin()
+        );
+
+        return ResponseEntity.ok(isValid);
+    }
+
     @PostMapping("/update-pin")
     public ResponseEntity<?> updatePin(@RequestBody ChangePinRequest request) {
         walletService.changePin(request);
